@@ -1,0 +1,218 @@
+.about-page {
+    background-color: var(--background-base);
+    color: var(--text-primary);
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 80vh;
+    padding: 80px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(to bottom, var(--background-card), var(--background-base));
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.hero-content h2 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: var(--text-secondary);
+}
+
+.user-types {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.user-type {
+    flex: 1;
+    max-width: 300px;
+    padding: 30px;
+    background: var(--background-card);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+/* Features Section */
+.features-section {
+    padding: 100px 20px;
+    background: var(--background-base);
+}
+
+.section-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 60px;
+}
+
+.badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    padding: 30px;
+    background: var(--background-card);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* How It Works Section */
+.how-it-works-section {
+    padding: 100px 20px;
+    background: var(--background-card);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.step-card {
+    padding: 30px;
+    background: var(--background-base);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+/* Testimonials Section */
+.testimonials-section {
+    padding: 100px 20px;
+    background: var(--background-base);
+}
+
+.testimonials-carousel {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+    padding: 20px 0;
+}
+
+.testimonial-card {
+    min-width: 300px;
+    padding: 30px;
+    background: var(--background-card);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.rating {
+    margin-bottom: 20px;
+    color: gold;
+}
+
+.author {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.author-info h4 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.author-info p {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 100px 20px;
+    text-align: center;
+    background: var(--background-card);
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.btn {
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .user-types {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-type {
+        width: 100%;
+    }
+
+    .testimonials-carousel {
+        padding: 20px;
+    }
+} 

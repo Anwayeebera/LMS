@@ -1,0 +1,120 @@
+.course-management {
+    padding: 40px;
+    background-color: var(--background-base);
+    min-height: calc(100vh - 70px);
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.filters {
+    background: var(--background-card);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.course-card {
+    background: var(--background-card);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease;
+}
+
+.course-card:hover {
+    background-color: var(--background-hover);
+    transform: translateY(-5px);
+}
+
+.course-card h3 {
+    margin: 0 0 10px;
+    color: var(--text-primary);
+}
+
+.course-card p {
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.course-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.course-meta span {
+    background: var(--background-input);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.error-container {
+    text-align: center;
+    padding: 40px;
+    color: var(--error-color);
+}
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+}
+
+.management-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.back-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+} 

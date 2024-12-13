@@ -1,0 +1,113 @@
+/* Navbar styles */
+.navbar {
+    background-color: var(--background-nav);
+    position: sticky;
+    top: 0;
+    /* height: 50px; */
+    z-index: 1000;
+    box-shadow: var(--nav-shadow);
+    transition: all 0.3s ease;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.navbar-links ul {
+    display: flex;
+    list-style-type: none;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-links li {
+    margin: 0 15px;
+}
+
+.navbar-links a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.navbar-links a:hover {
+    color: var(--green-color);
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 5px;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.navbar-links button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px 10px;
+}
+
+.navbar-links button:hover {
+    color: var(--green-color);
+}
+
+.more-links {
+    position: relative;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    /* Ensures it appears below the navbar */
+    left: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    list-style-type: none;
+    margin: 0;
+    padding: 10px 0;
+    display: none;
+    min-width: 200px;
+    /* Minimum width for better alignment */
+}
+
+.more-links:hover .dropdown {
+    display: block;
+}
+
+.dropdown li {
+    padding: 8px 20px;
+}
+
+.dropdown li a {
+    color: #333;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.dropdown li a:hover {
+    color: #0073e6;
+}
