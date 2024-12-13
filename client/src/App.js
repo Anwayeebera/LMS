@@ -31,7 +31,8 @@ const App = () => {
                   <TeacherDashboard />
                 </ProtectedRoute>
               } 
-            />
+            /> 
+            
             <Route 
               path="/student" 
               element={
