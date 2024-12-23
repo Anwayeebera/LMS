@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import User from '../models/User.js';
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
     try {
         const { name, email, password, role, age } = req.body;
         
@@ -93,26 +93,47 @@ exports.register = async (req, res) => {
         });
     }
 };
-exports.login = async (req, res) => {
+
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         
         const user = await User.findOne({ email });
         if (!user) {
-            console.log('No user found with the email:', email); // Log when no user is found
+            console.log('No user found with the email:', email);
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
         const isMatch = await bcrypt.compare(password.trim(), user.password);
         if (!isMatch) {
-            console.log('Password mismatch for user:', user.password); // Log when password doesn't match
+            console.log('Password mismatch for user:', email);
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
-        res.status(200).json({ token, email: user.email, role: user.role });
+        console.log('Creating token for user:', {
+            id: user._id,
+            email: user.email,
+            role: user.role
+        });
+
+        const token = jwt.sign(
+            { 
+                id: user._id,
+                email: user.email,
+                role: user.role 
+            }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1d' }
+        );
+
+        res.status(200).json({ 
+            token, 
+            email: user.email, 
+            role: user.role,
+            id: user._id 
+        });
     } catch (err) {
-        console.log('Error during login:', err); // Log the actual error
+        console.error('Login error:', err);
         res.status(500).json({ error: err.message });
     }
 };

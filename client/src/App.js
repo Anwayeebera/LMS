@@ -13,7 +13,8 @@ import { ThemeProvider } from './context/ThemeContext';
 import './styles/common.css';
 import AboutPage from './components/AboutPage';
 import CourseManagement from './components/courses/CourseManagement';
-
+import CourseView from './components/courses/CourseView';
+import EnrollCourse from './components/courses/EnrollCourse';
 const App = () => {
   return (
     <UserProvider>
@@ -32,7 +33,14 @@ const App = () => {
                 </ProtectedRoute>
               } 
             /> 
-            
+            <Route 
+              path="/try" 
+              element={
+                <ProtectedRoute>
+                  <CourseView />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/student" 
               element={
@@ -54,6 +62,22 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <CourseManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/course/:courseId" 
+              element={
+                <ProtectedRoute>
+                  <CourseView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/enroll-course" 
+              element={
+                <ProtectedRoute>
+                  <EnrollCourse />
                 </ProtectedRoute>
               } 
             />

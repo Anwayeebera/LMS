@@ -45,6 +45,8 @@
     padding: 20px;
     box-shadow: var(--card-shadow);
     transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .course-card:hover {
@@ -57,16 +59,35 @@
     color: var(--text-primary);
 }
 
-.course-card p {
-    color: var(--text-secondary);
+.course-description {
+    flex-grow: 1;
     margin-bottom: 15px;
+    color: var(--text-secondary);
     line-height: 1.5;
+}
+
+.view-course-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: var(--green-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-course-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
 }
 
 .course-meta {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: auto;
 }
 
 .course-meta span {
@@ -117,4 +138,87 @@
 .back-btn:hover {
     background-color: var(--primary-color);
     color: white;
+}
+
+.course-content {
+    margin: 15px 0;
+    padding: 10px;
+    background: var(--background-dark);
+    border-radius: 6px;
+}
+
+.course-content h4 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.content-item-preview {
+    padding: 8px;
+    margin: 8px 0;
+    border-left: 3px solid var(--green-color);
+    background: var(--background-input);
+    border-radius: 0 4px 4px 0;
+}
+
+.content-type {
+    display: inline-block;
+    padding: 3px 8px;
+    background: var(--green-color);
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-bottom: 5px;
+}
+
+.content-item-preview p {
+    margin: 5px 0 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .course-meta {
+        flex-direction: column;
+    }
+    
+    .course-meta span {
+        width: fit-content;
+    }
+} 
+
+.course-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.share-btn {
+    flex: 1;
+    padding: 10px;
+    background-color: var(--background-input);
+    color: var(--text-primary);
+    border: 2px solid var(--green-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.share-btn:hover {
+    background-color: var(--green-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.view-course-btn {
+    flex: 1;
+    /* ... rest of existing styles remain the same ... */
+}
+
+/* Make the buttons stack on mobile */
+@media screen and (max-width: 768px) {
+    .course-actions {
+        flex-direction: column;
+    }
 } 
