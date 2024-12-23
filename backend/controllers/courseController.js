@@ -1,28 +1,43 @@
-const Course = require('../models/Course');
-const { validateCourse } = require('../utils/validation');
+import Course from '../models/Course.js';
+import User from '../models/User.js';
+import { validateCourse } from '../utils/validation.js';
 
-const createCourse = async (req, res) => {
+export const createCourse = async (req, res) => {
     try {
-        console.log('Request body:', req.body);
+        console.log('=== Create Course Request ===');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        console.log('User:', req.user);
+
         const { title, description, content } = req.body;
         
-        if (!title || !description) {
+        // Validate course data
+        const validation = validateCourse(req.body);
+        console.log('Validation details:', {
+            error: validation.error,
+            value: validation.value,
+            details: validation.error?.details
+        });
+        
+        if (validation.error) {
+            console.log('Validation failed:', validation.error.details);
             return res.status(400).json({ 
                 error: 'Validation failed',
-                message: 'Title and description are required'
+                details: validation.error.details.map(d => d.message)
             });
         }
 
+        // Create course with validated data
         const course = new Course({
-            title,
-            description,
-            content: content || [],
+            title: validation.value.title,
+            description: validation.value.description,
+            content: validation.value.content,
             creator: req.user.id,
-            enrollmentStatus: 'draft'
+            enrollmentStatus: validation.value.enrollmentStatus
         });
 
+        console.log('Attempting to save course:', JSON.stringify(course, null, 2));
         const savedCourse = await course.save();
-        console.log('Course saved:', savedCourse);
+        console.log('Course saved successfully:', savedCourse);
 
         res.status(201).json({
             success: true,
@@ -31,8 +46,8 @@ const createCourse = async (req, res) => {
         });
     } catch (error) {
         console.error('Course creation error:', {
+            name: error.name,
             message: error.message,
-            code: error.code,
             stack: error.stack
         });
         
@@ -50,7 +65,7 @@ const createCourse = async (req, res) => {
     }
 };
 
-const getCourses = async (req, res) => {
+export const getCourses = async (req, res) => {
     try {
         console.log('Received request for courses:', {
             query: req.query,
@@ -114,7 +129,7 @@ const getCourses = async (req, res) => {
     }
 };
 
-const updateCourse = async (req, res) => {
+export const updateCourse = async (req, res) => {
     try {
         const course = await Course.findById(req.params.id);
         
@@ -138,22 +153,124 @@ const updateCourse = async (req, res) => {
     }
 };
 
-const enrollCourse = async (req, res) => {
+export const enrollCourse = async (req, res) => {
     try {
-        const course = await Course.findById(req.params.courseId);
-        if (!course) return res.status(404).json({ error: 'Course not found' });
-        const user = req.user;
-        user.enrolledCourses.push(course._id);
-        await user.save();
-        res.status(200).json({ message: 'Enrolled successfully' });
+        const { courseId } = req.params;
+        const userId = req.user.id;
+
+        console.log('\n=== Enrollment Debug ===');
+        console.log('Course ID:', courseId);
+        console.log('User ID:', userId);
+        console.log('Full user object:', req.user);
+
+        // Find the course first
+        const course = await Course.findById(courseId);
+        console.log('Found course:', course ? {
+            id: course._id,
+            title: course.title,
+            enrolledStudents: course.enrolledStudents
+        } : 'No');
+        
+        if (!course) {
+            return res.status(404).json({ 
+                error: 'Course not found',
+                courseId: courseId
+            });
+        }
+
+        // Find the user
+        const user = await User.findById(userId);
+        console.log('Found user:', user ? {
+            id: user._id,
+            email: user.email,
+            enrolledCourses: user.enrolledCourses
+        } : 'No');
+
+        if (!user) {
+            return res.status(404).json({ 
+                error: 'User not found',
+                userId: userId
+            });
+        }
+
+        // Check if already enrolled
+        const isEnrolled = course.enrolledStudents.some(
+            studentId => studentId.toString() === userId.toString()
+        );
+        console.log('Already enrolled:', isEnrolled);
+
+        if (isEnrolled) {
+            return res.status(400).json({ error: 'Already enrolled in this course' });
+        }
+
+        // Perform enrollment
+        try {
+            console.log('Before push - Course enrolledStudents:', course.enrolledStudents);
+            console.log('Before push - User enrolledCourses:', user.enrolledCourses);
+
+            course.enrolledStudents.push(userId);
+            user.enrolledCourses.push(courseId);
+
+            console.log('After push - Course enrolledStudents:', course.enrolledStudents);
+            console.log('After push - User enrolledCourses:', user.enrolledCourses);
+
+            console.log('Saving course...');
+            await course.save();
+            console.log('Course saved successfully');
+
+            console.log('Saving user...');
+            await user.save();
+            console.log('User saved successfully');
+
+            console.log('=== Enrollment Complete ===\n');
+
+            return res.status(200).json({
+                success: true,
+                message: 'Successfully enrolled in the course'
+            });
+        } catch (saveError) {
+            console.error('Save operation failed:', saveError);
+            console.error('Save error details:', {
+                name: saveError.name,
+                message: saveError.message,
+                stack: saveError.stack
+            });
+            throw saveError;
+        }
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('=== Enrollment Error ===');
+        console.error('Error type:', err.name);
+        console.error('Error message:', err.message);
+        console.error('Stack trace:', err.stack);
+        console.error('=== End Error ===\n');
+
+        return res.status(500).json({
+            error: 'Failed to enroll in course',
+            details: err.message
+        });
     }
 };
 
-module.exports = {
-    createCourse,
-    getCourses,
-    updateCourse,
-    enrollCourse
+export const getCourseById = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        console.log('\n=== Get Course Request ===');
+        console.log('Course ID:', courseId);
+
+        const course = await Course.findById(courseId)
+            .populate('creator', 'name email')
+            .populate('enrolledStudents', 'name email');
+
+        if (!course) {
+            console.log('Course not found');
+            return res.status(404).json({ error: 'Course not found' });
+        }
+
+        console.log('Course found:', course.title);
+        res.json(course);
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
 };

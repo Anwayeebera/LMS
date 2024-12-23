@@ -17,6 +17,7 @@ const Login = () => {
             const { data } = await login(formData);
             if (data.token) {
                 localStorage.setItem('token', data.token);
+                console.log('Token set:', data.token);
                 localStorage.setItem('email', data.email);
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('userId', data.id);
@@ -34,6 +35,7 @@ const Login = () => {
                 }
             }
         } catch (error) {
+            console.error('Login error:', error);
             setError('Login failed. Please check your credentials.');
         }
     };

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const CourseSchema = new mongoose.Schema({
     title: { 
@@ -45,4 +45,4 @@ CourseSchema.pre('save', async function(next) {
     }
 });
 
-module.exports = mongoose.model('Course', CourseSchema);
+export default mongoose.model('Course', CourseSchema);

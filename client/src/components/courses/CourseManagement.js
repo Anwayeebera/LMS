@@ -15,16 +15,17 @@ const CourseManagement = () => {
     });
 
     // Debounced search function
-    const debouncedSearch = useCallback(
-        debounce((searchValue) => {
+    const debouncedSearch = useCallback((searchValue) => {
+        let timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
             setFilters(prev => ({
                 ...prev,
                 search: searchValue,
                 page: 1
             }));
-        }, 500), // 500ms delay
-        []
-    );
+        }, 500);
+    }, [setFilters]);
 
     const handleSearch = (e) => {
         const value = e.target.value;
@@ -32,24 +33,7 @@ const CourseManagement = () => {
         debouncedSearch(value);
     };
 
-    // Debounce helper function
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    useEffect(() => {
-        loadCourses();
-    }, [filters]);
-
-    const loadCourses = async () => {
+    const loadCourses = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -68,6 +52,27 @@ const CourseManagement = () => {
         } finally {
             setLoading(false);
         }
+    }, [filters]);
+
+    useEffect(() => {
+        loadCourses();
+    }, [loadCourses]);
+
+    const handleViewCourse = (courseId) => {
+        console.log('Navigating to course:', courseId);
+        navigate(`/course/${courseId}`);
+    };
+
+    const handleCopyLink = (courseId) => {
+        const courseLink = `${window.location.origin}/course/${courseId}`;
+        navigator.clipboard.writeText(courseLink)
+            .then(() => {
+                alert('Course link copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy link');
+            });
     };
 
     if (loading) return <div className="loading">Loading courses...</div>;
@@ -102,10 +107,25 @@ const CourseManagement = () => {
                     courses.map(course => (
                         <div key={course._id} className="course-card">
                             <h3>{course.title}</h3>
-                            <p>{course.description}</p>
+                            <p className="course-description">{course.description}</p>
                             <div className="course-meta">
                                 <span>Created by: {course.creator?.name || 'Unknown'}</span>
-                                <span>Content items: {course.content?.length || 0}</span>
+                                <span>Status: {course.enrollmentStatus || 'Draft'}</span>
+                                <span>Students: {course.enrolledStudents?.length || 0}</span>
+                            </div>
+                            <div className="course-actions">
+                                <button 
+                                    className="view-course-btn"
+                                    onClick={() => handleViewCourse(course._id)}
+                                >
+                                    View Full Course
+                                </button>
+                                <button 
+                                    className="share-btn"
+                                    onClick={() => handleCopyLink(course._id)}
+                                >
+                                    Copy Share Link
+                                </button>
                             </div>
                         </div>
                     ))

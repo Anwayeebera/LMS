@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { createCourse } from '../../api';
 import './CreateCourse.css';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const CreateCourse = () => {
     const [courseData, setCourseData] = useState({
@@ -11,24 +10,22 @@ const CreateCourse = () => {
         content: []
     });
 
-    const [isAddingContent, setIsAddingContent] = useState(false);
     const [contentType, setContentType] = useState(null);
     const [currentContent, setCurrentContent] = useState('');
     const [currentFile, setCurrentFile] = useState(null);
     const [editingContent, setEditingContent] = useState(null);
+    const [isAddingContent, setIsAddingContent] = useState(false);
 
     const navigate = useNavigate();
 
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
     const isValidYouTubeUrl = (url) => {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
         return match && match[2].length === 11;
     };
 
     const extractYouTubeId = (url) => {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
     };
@@ -41,11 +38,16 @@ const CreateCourse = () => {
             const videoId = extractYouTubeId(currentContent);
             contentData = {
                 url: currentContent,
-                videoId: videoId,
-                embedUrl: `https://www.youtube.com/embed/${videoId}`
+                videoId: videoId
+            };
+        } else if (contentType === 'document') {
+            contentData = {
+                name: currentFile.name,
+                type: currentFile.type,
+                url: URL.createObjectURL(currentFile)
             };
         } else {
-            contentData = contentType === 'text' ? currentContent : currentFile;
+            contentData = currentContent;
         }
 
         setCourseData(prev => ({
@@ -77,90 +79,65 @@ const CreateCourse = () => {
                 return;
             }
 
-            const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-            console.log('Token payload:', tokenPayload);
-
-            // Format the content properly
+            // Format the content properly before sending
             const formattedContent = courseData.content.map(item => {
-                if (item.type === 'text') {
-                    return {
-                        type: 'text',
-                        data: item.data
-                    };
-                } else if (item.type === 'video') {
-                    return {
-                        type: 'video',
-                        data: {
-                            url: item.data.url,
-                            videoId: extractYouTubeId(item.data.url)
-                        }
-                    };
-                } else if (item.type === 'document') {
-                    return {
-                        type: 'document',
-                        data: {
-                            name: item.data.name,
-                            url: item.data.url || '',
-                            type: item.data.type
-                        }
-                    };
+                switch(item.type) {
+                    case 'text':
+                        return {
+                            type: 'text',
+                            data: item.data
+                        };
+                    case 'video':
+                        return {
+                            type: 'video',
+                            data: {
+                                url: item.data.url,
+                                videoId: item.data.videoId
+                            }
+                        };
+                    case 'document':
+                        return {
+                            type: 'document',
+                            data: {
+                                name: item.data.name,
+                                type: item.data.type,
+                                url: item.data.url
+                            }
+                        };
+                    default:
+                        return item;
                 }
-                return item;
             });
 
-            // Create the payload
             const coursePayload = {
-                title: courseData.title,
-                description: courseData.description,
-                content: formattedContent
+                title: courseData.title.trim(),
+                description: courseData.description.trim(),
+                content: formattedContent,
+                enrollmentStatus: 'draft'
             };
 
-            // Add token validation check
-            console.log('Token before request:', token);
-            
-            console.log('Making request to:', `${API_URL}/courses`);
-            
-            const response = await axios({
-                method: 'POST',
-                url: `${API_URL}/courses`,
-                data: coursePayload,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            console.log('Sending course payload:', JSON.stringify(coursePayload, null, 2));
 
-            if (response.data) {
+            const response = await createCourse(coursePayload);
+            console.log('Course creation response:', response);
+
+            if (response.data.success) {
                 alert('Course created successfully!');
                 navigate('/manage-courses');
             }
         } catch (error) {
             console.error('Error details:', {
+                response: error.response?.data,
                 status: error.response?.status,
-                statusText: error.response?.statusText,
-                message: error.response?.data?.message,
-                error: error.message,
-                config: {
-                    ...error.config,
-                    headers: error.config?.headers
-                },
-                responseData: error.response?.data
+                message: error.message
             });
             
-            if (!error.response) {
-                alert('Network error. Please check your connection.');
-            } else if (error.response.status === 401) {
-                console.log('Unauthorized: Token might be invalid or expired');
-                alert('Your session has expired. Please login again.');
-                navigate('/login');
-            } else if (error.response.status === 403) {
-                console.log('Forbidden:', error.response?.data?.message || 'User might not have permission');
-                alert(`Permission denied: ${error.response?.data?.message || 'You do not have permission to create courses.'}`);
-            } else if (error.response.status === 404) {
-                alert('API endpoint not found. Please check server configuration.');
-            } else {
-                alert(error.response?.data?.message || 'Failed to create course. Please try again.');
-            }
+            const errorMessage = error.response?.data?.details || 
+                            error.response?.data?.message || 
+                            error.response?.data?.error ||
+                            'Failed to create course. Please try again.';
+            
+            alert(errorMessage);
         }
     };
 
@@ -229,6 +206,7 @@ const CreateCourse = () => {
                                     setEditingContent(null);
                                     setCurrentContent('');
                                     setCurrentFile(null);
+                                    setIsAddingContent(false);
                                 }} 
                                 className="cancel-btn"
                             >
@@ -263,6 +241,7 @@ const CreateCourse = () => {
                                     setEditingContent(null);
                                     setCurrentContent('');
                                     setCurrentFile(null);
+                                    setIsAddingContent(false);
                                 }} 
                                 className="cancel-btn"
                             >
@@ -281,25 +260,28 @@ const CreateCourse = () => {
             case 'video':
                 return (
                     <div className="content-input-container">
-                        <div className="video-input-options">
-                            <h3>Add Video Content</h3>
-                            <div className="video-options">
-                                <input
-                                    type="text"
-                                    placeholder="Enter YouTube Video URL"
-                                    className="course-input"
-                                    value={currentContent}
-                                    onChange={(e) => setCurrentContent(e.target.value)}
-                                />
-                                <div className="video-instructions">
-                                    <p>How to add a video:</p>
-                                    <ol>
-                                        <li>Upload your video to YouTube as "Unlisted"</li>
-                                        <li>Copy the video URL</li>
-                                        <li>Paste it here</li>
-                                    </ol>
+                        <div className="video-input-wrapper">
+                            <input
+                                type="text"
+                                placeholder="Enter YouTube Video URL"
+                                className="course-input"
+                                value={currentContent}
+                                onChange={(e) => setCurrentContent(e.target.value)}
+                            />
+                            {currentContent && isValidYouTubeUrl(currentContent) && (
+                                <div className="video-preview">
+                                    <h4>Video Preview</h4>
+                                    <div className="video-container">
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${extractYouTubeId(currentContent)}`}
+                                            title="Video Preview"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                         <div className="content-actions">
                             <button 
@@ -308,6 +290,7 @@ const CreateCourse = () => {
                                     setEditingContent(null);
                                     setCurrentContent('');
                                     setCurrentFile(null);
+                                    setIsAddingContent(false);
                                 }} 
                                 className="cancel-btn"
                             >
@@ -316,9 +299,9 @@ const CreateCourse = () => {
                             <button 
                                 onClick={editingContent !== null ? handleUpdateContent : handleAddContent} 
                                 className="add-btn"
-                                disabled={contentType === 'video' && !isValidYouTubeUrl(currentContent)}
+                                disabled={!isValidYouTubeUrl(currentContent)}
                             >
-                                {editingContent !== null ? 'Update' : 'Add'} {contentType}
+                                {editingContent !== null ? 'Update' : 'Add'} Video
                             </button>
                         </div>
                     </div>
@@ -334,7 +317,7 @@ const CreateCourse = () => {
             alert('Please login to create a course');
             navigate('/login');
         }
-    }, []);
+    }, [navigate]);
 
     return (
         <div className="create-course">
@@ -398,19 +381,45 @@ const CreateCourse = () => {
                         </div>
                     ))}
 
-                    {!contentType && (
-                        <div className="add-content-line-container">
-                            <div className="add-content-line">
-                                <div className="content-type-buttons">
-                                    <button onClick={() => setContentType('text')}>Add Text</button>
-                                    <button onClick={() => setContentType('document')}>Add Document</button>
-                                    <button onClick={() => setContentType('video')}>Add Video</button>
-                                </div>
+                    <div className="add-content-line-container">
+                        <div className="add-content-line">
+                            <div className="content-type-buttons">
+                                <button 
+                                    onClick={() => {
+                                        setContentType('text');
+                                        setIsAddingContent(true);
+                                    }}
+                                    className={contentType === 'text' ? 'active' : ''}
+                                >
+                                    Add Text
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        setContentType('document');
+                                        setIsAddingContent(true);
+                                    }}
+                                    className={contentType === 'document' ? 'active' : ''}
+                                >
+                                    Add Document
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        setContentType('video');
+                                        setIsAddingContent(true);
+                                    }}
+                                    className={contentType === 'video' ? 'active' : ''}
+                                >
+                                    Add Video Link
+                                </button>
                             </div>
                         </div>
-                    )}
+                    </div>
 
-                    {contentType && renderContentInput()}
+                    {contentType && isAddingContent && (
+                        <div className="add-content-options">
+                            {renderContentInput()}
+                        </div>
+                    )}
                 </div>
 
                 <div className="submit-container">
